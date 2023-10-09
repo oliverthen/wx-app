@@ -1,9 +1,10 @@
 from fastapi import FastAPI
+from decouple import config
 import requests
 
 app = FastAPI()
 
-key_api = '7bde4586e85a32fd9b24b872e8506e30'
+key_api = config('API_KEY')
 
 @app.get("/")
 def root():
