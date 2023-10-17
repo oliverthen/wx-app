@@ -52,7 +52,7 @@ async def process_coordinates(
 	return templates.TemplateResponse("weather.html", {"request": request, "temp_c": round(temp_c), "temp_f": round(temp_f)})
 
 @app.post("/register")
-def register_user(session: Depends(get_session), user: User):
+def register_user(*, session: Session = Depends(get_session), user: User):
 	query = select(User).where(User.handle == user.handle)
 	existing_user = session.exec(query).first()
 	if existing_user is not None:
