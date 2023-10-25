@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from sqlmodel import Session, select
 
-from .models import User, get_session, create_db_and_tables
+from models import User, get_session, create_db_and_tables
 
 import requests
 
@@ -34,10 +34,19 @@ async def get_coordinates(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/process_coordinates", response_class=HTMLResponse)
-async def process_coordinates(
-    request: Request, latitude: float = Form(...), longitude: float = Form(...)
+@app.post("/process_zip_or_city", response_class=HTMLResponse)
+async def process_zip(
+    request: Request, zipcode: str = Form(...)
 ):
+    zip_url = f"http://api.openweathermap.org/geo/1.0/zip?zip={zipcode},US&appid={key_api}"
+
+    zip_response = requests.get(zip_url)
+    zip_data = zip_response.json()
+
+    latitude = zip_data["lat"]
+    longitude = zip_data["lon"]
+    
+    
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={key_api}"
 
     response = requests.get(url)

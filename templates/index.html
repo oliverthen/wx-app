@@ -8,16 +8,16 @@
 </head>
 <body>
 	<div class="container mt-5">
-		<h1 class="mb-4">Enter Your Latitude and Longitude</h1>
-		<form action="/process_coordinates" method="post">
+		<h1 class="mb-4">Enter Your ZipCode</h1>
+		<form action="/process_zip_or_city" method="post">
 			<div class="form-group">
-				<label for="latitude">Latitude:</label>
-				<input type="text" class="form-control" name="latitude" id="latitude" required>
+				<label for="zipcode">ZipCode:</label>
+				<input type="text" class="form-control" name="zipcode" id="zipcode" required>
 			</div>
-			<div class="form-group">
+			<!-- <div class="form-group">
 				<label for="longitude">Longitude:</label>
 				<input type="text" class="form-control" name="longitude" id="longitude" required>
-			</div>
+			</div> -->
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
 	</div>
