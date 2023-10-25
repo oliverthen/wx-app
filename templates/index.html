@@ -8,18 +8,45 @@
 </head>
 <body>
 	<div class="container mt-5">
-		<h1 class="mb-4">Enter Your ZipCode</h1>
-		<form action="/process_zip_or_city" method="post">
+		<h1 class="mb-4">Enter Your ZipCode or City Name and State</h1>
+		<form id="locationForm" action="/process_zip_or_city" method="post">
 			<div class="form-group">
 				<label for="zipcode">ZipCode:</label>
-				<input type="text" class="form-control" name="zipcode" id="zipcode" required>
+				<input type="text" class="form-control" name="zipcode" id="zipcode">
 			</div>
-			<!-- <div class="form-group">
-				<label for="longitude">Longitude:</label>
-				<input type="text" class="form-control" name="longitude" id="longitude" required>
-			</div> -->
+			<div class="form-group">
+				<label for="city">City Name:</label>
+				<input type="text" class="form-control" id="city" name="city">
+			</div>
+			<div class="form-group">
+				<label for="state">State Name:</label>
+				<input type="text" class="form-control" id="state" name="state">
+			</div>
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
 	</div>
+
+<!-- <script>
+	// FUTURE: Will be implementing some form validation on front end to ensure either zipcode entered or city and state entered. Also will not allow all 3 inputs to be submitted
+	// JavaScript for handling the form submission
+	document.getElementById("locationForm").addEventListener("submit", function (event) {
+		const zipCode = document.getElementById("zipcode").value;
+		const city = document.getElementById("city").value;
+		const state = document.getElementById("state").value;
+
+		// Check if all three fields are filled
+		if (zipCode && city && state) {
+			alert("Please provide either a Zip Code or City and State, but not all three.");
+			event.preventDefault(); // Prevent form submission
+		}
+
+		// Check if either zip code or city and state are provided
+		if (!zipCode && !city || !state) {
+			alert("Please provide either a Zip Code or City and State.");
+			event.preventDefault(); // Prevent form submission
+		}
+	});
+</script> -->
+
 </body>
 </html>

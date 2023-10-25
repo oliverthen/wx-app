@@ -28,16 +28,43 @@ def convert_celsius_to_fahrenheight(temp_celsius: float) -> float:
 def convert_kelvin_to_celsius(temp_kelvin: float) -> float:
     return temp_kelvin - 273.15
 
-def process_zip():
-    """Get"""
+def _process_zip(zipcode):
+    """Called by functions get_lat_zip or get_lon_zip to return JSON data of location specificied by zipcode"""
     zip_url = f"http://api.openweathermap.org/geo/1.0/zip?zip={zipcode},US&appid={key_api}"
 
     zip_response = requests.get(zip_url)
     zip_data = zip_response.json()
 
-    latitude = zip_data["lat"]
-    longitude = zip_data["lon"]
+    return zip_data
 
+def _process_city_state(city, state):
+    """Called by functions get_lat_city or get_lon_city to return JSON data of location specificied by city and name"""
+    city_state_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city},{state},US&appid={key_api}"
+
+    city_state_response = requests.get(city_state_url)
+    city_data = city_state_response.json()
+
+    return city_data
+
+def get_lat_zip(zipcode):
+    """Receives JSON data of location specified by zip code entered and returns latitude of location"""
+    zip_data = _process_zip(zipcode)
+    return zip_data["lat"]
+
+def get_lon_zip(zipcode):
+    """Receives JSON data of location specified by zip code entered and returns longitude of location"""
+    zip_data = _process_zip(zipcode)
+    return zip_data["lon"]
+
+def get_lat_city(city, state):
+    """Receives JSON data of location specified by city and state entered and returns latitude of location"""
+    city_data = _process_city_state(city, state)
+    return city_data[0]["lat"]
+
+def get_lon_city(city, state):
+    """Receives JSON data of location specified by city and state entered and returns latitude of location"""
+    city_data = _process_city_state(city, state)
+    return city_data[0]["lon"]
 
 @app.get("/", response_class=HTMLResponse)
 async def get_coordinates(request: Request):
@@ -46,10 +73,16 @@ async def get_coordinates(request: Request):
 
 @app.post("/process_zip_or_city", response_class=HTMLResponse)
 async def return_data(
-    request: Request, zipcode: str = Form(...)
+    request: Request, zipcode: str = Form(None), city: str = Form(None), state: str = Form(None)
 ):
-    process_zip(zipcode)
+    """Route that handles zipcode or city and state to return weather data"""
     
+    if zipcode is not None:
+        latitude = get_lat_zip(zipcode)
+        longitude = get_lon_zip(zipcode)
+    else:
+        latitude = get_lat_city(city, state)
+        longitude = get_lon_city(city, state)
     
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={key_api}"
 
