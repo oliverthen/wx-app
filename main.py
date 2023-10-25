@@ -28,16 +28,8 @@ def convert_celsius_to_fahrenheight(temp_celsius: float) -> float:
 def convert_kelvin_to_celsius(temp_kelvin: float) -> float:
     return temp_kelvin - 273.15
 
-
-@app.get("/", response_class=HTMLResponse)
-async def get_coordinates(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.post("/process_zip_or_city", response_class=HTMLResponse)
-async def process_zip(
-    request: Request, zipcode: str = Form(...)
-):
+def process_zip():
+    """Get"""
     zip_url = f"http://api.openweathermap.org/geo/1.0/zip?zip={zipcode},US&appid={key_api}"
 
     zip_response = requests.get(zip_url)
@@ -45,6 +37,18 @@ async def process_zip(
 
     latitude = zip_data["lat"]
     longitude = zip_data["lon"]
+
+
+@app.get("/", response_class=HTMLResponse)
+async def get_coordinates(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.post("/process_zip_or_city", response_class=HTMLResponse)
+async def return_data(
+    request: Request, zipcode: str = Form(...)
+):
+    process_zip(zipcode)
     
     
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={key_api}"
