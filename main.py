@@ -33,38 +33,26 @@ def _process_zip(zipcode):
     zip_url = f"http://api.openweathermap.org/geo/1.0/zip?zip={zipcode},US&appid={key_api}"
 
     zip_response = requests.get(zip_url)
-    zip_data = zip_response.json()
-
-    return zip_data
+    return zip_response.json()
 
 def _process_city_state(city, state):
     """Called by functions get_lat_city or get_lon_city to return JSON data of location specificied by city and name"""
     city_state_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city},{state},US&appid={key_api}"
 
     city_state_response = requests.get(city_state_url)
-    city_data = city_state_response.json()
 
-    return city_data
+    return city_state_response.json()
 
-def get_lat_zip(zipcode):
-    """Receives JSON data of location specified by zip code entered and returns latitude of location"""
+def get_lat_lon_zip(zipcode):
+    """Receives JSON data of location specified by zip code entered and returns tuple with latitude and longitude of location"""
     zip_data = _process_zip(zipcode)
-    return zip_data["lat"]
+    return (zip_data["lat"], zip_data["lon"])
 
-def get_lon_zip(zipcode):
-    """Receives JSON data of location specified by zip code entered and returns longitude of location"""
-    zip_data = _process_zip(zipcode)
-    return zip_data["lon"]
 
-def get_lat_city(city, state):
-    """Receives JSON data of location specified by city and state entered and returns latitude of location"""
+def get_lat_lon_city(city, state):
+    """Receives JSON data of location specified by city and state entered and returns tuple with latitude and longitude of location"""
     city_data = _process_city_state(city, state)
-    return city_data[0]["lat"]
-
-def get_lon_city(city, state):
-    """Receives JSON data of location specified by city and state entered and returns latitude of location"""
-    city_data = _process_city_state(city, state)
-    return city_data[0]["lon"]
+    return (city_data[0]["lat"], city_data[0]["lon"])
 
 @app.get("/", response_class=HTMLResponse)
 async def get_coordinates(request: Request):
@@ -78,11 +66,9 @@ async def return_data(
     """Route that handles zipcode or city and state to return weather data"""
     
     if zipcode is not None:
-        latitude = get_lat_zip(zipcode)
-        longitude = get_lon_zip(zipcode)
+        (latitude, longitude) = get_lat_lon_zip(zipcode)        
     else:
-        latitude = get_lat_city(city, state)
-        longitude = get_lon_city(city, state)
+        (latitude, longitude) = get_lat_lon_city(city, state)
     
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={key_api}"
 
