@@ -88,12 +88,20 @@ async def return_data(
     (loc_name, loc_state) = get_location_name(latitude, longitude)
     location_name = f"{loc_name}, {loc_state}"
 
+    humidity = data["current"]["humidity"]
+    pressure = data["current"]["pressure"]
+    weather_description = data["current"]["weather"][0]["description"]
+
     temp_c = convert_kelvin_to_celsius(data["current"]["temp"])
     temp_f = convert_celsius_to_fahrenheight(temp_c)
 
+    icon_code = data["current"]["weather"][0]["icon"]
+
+    weather_icon = f"https://openweathermap.org/img/wn/{icon_code}@2x.png"
+
     return templates.TemplateResponse(
         "weather.html",
-        {"request": request, "location_name": location_name, "temp_c": round(temp_c), "temp_f": round(temp_f)},
+        {"request": request, "location_name": location_name, "humidity": humidity, "pressure": pressure, "weather_description": weather_description, "temp_c": round(temp_c), "temp_f": round(temp_f), "weather_icon": weather_icon},
     )
 
 
