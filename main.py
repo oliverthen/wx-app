@@ -54,6 +54,16 @@ def get_lat_lon_city(city, state):
     city_data = _process_city_state(city, state)
     return (city_data[0]["lat"], city_data[0]["lon"])
 
+def get_location_name(latitude, longitude):
+    """Based upon coordinates, returns name of location"""
+    geo_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={latitude}&lon={longitude}&appid={key_api}"
+
+    geo_response = requests.get(geo_url)
+    response = geo_response.json()
+    print(response)
+    
+    return (response[0]["name"], response[0]["state"])
+
 @app.get("/", response_class=HTMLResponse)
 async def get_coordinates(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -75,13 +85,15 @@ async def return_data(
     response = requests.get(url)
     data = response.json()
 
-    temp_c = convert_kelvin_to_celsius(data["current"]["temp"])
+    (loc_name, loc_state) = get_location_name(latitude, longitude)
+    location_name = f"{loc_name}, {loc_state}"
 
+    temp_c = convert_kelvin_to_celsius(data["current"]["temp"])
     temp_f = convert_celsius_to_fahrenheight(temp_c)
 
     return templates.TemplateResponse(
         "weather.html",
-        {"request": request, "temp_c": round(temp_c), "temp_f": round(temp_f)},
+        {"request": request, "location_name": location_name, "temp_c": round(temp_c), "temp_f": round(temp_f)},
     )
 
 
