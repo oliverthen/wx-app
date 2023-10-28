@@ -33,38 +33,36 @@ def _process_zip(zipcode):
     zip_url = f"http://api.openweathermap.org/geo/1.0/zip?zip={zipcode},US&appid={key_api}"
 
     zip_response = requests.get(zip_url)
-    zip_data = zip_response.json()
-
-    return zip_data
+    return zip_response.json()
 
 def _process_city_state(city, state):
     """Called by functions get_lat_city or get_lon_city to return JSON data of location specificied by city and name"""
     city_state_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city},{state},US&appid={key_api}"
 
     city_state_response = requests.get(city_state_url)
-    city_data = city_state_response.json()
 
-    return city_data
+    return city_state_response.json()
 
-def get_lat_zip(zipcode):
-    """Receives JSON data of location specified by zip code entered and returns latitude of location"""
+def get_lat_lon_zip(zipcode):
+    """Receives JSON data of location specified by zip code entered and returns tuple with latitude and longitude of location"""
     zip_data = _process_zip(zipcode)
-    return zip_data["lat"]
+    return (zip_data["lat"], zip_data["lon"])
 
-def get_lon_zip(zipcode):
-    """Receives JSON data of location specified by zip code entered and returns longitude of location"""
-    zip_data = _process_zip(zipcode)
-    return zip_data["lon"]
 
-def get_lat_city(city, state):
-    """Receives JSON data of location specified by city and state entered and returns latitude of location"""
+def get_lat_lon_city(city, state):
+    """Receives JSON data of location specified by city and state entered and returns tuple with latitude and longitude of location"""
     city_data = _process_city_state(city, state)
-    return city_data[0]["lat"]
+    return (city_data[0]["lat"], city_data[0]["lon"])
 
-def get_lon_city(city, state):
-    """Receives JSON data of location specified by city and state entered and returns latitude of location"""
-    city_data = _process_city_state(city, state)
-    return city_data[0]["lon"]
+def get_location_name(latitude, longitude):
+    """Based upon coordinates, returns name of location"""
+    geo_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={latitude}&lon={longitude}&appid={key_api}"
+
+    geo_response = requests.get(geo_url)
+    response = geo_response.json()
+    print(response)
+    
+    return (response[0]["name"], response[0]["state"])
 
 @app.get("/", response_class=HTMLResponse)
 async def get_coordinates(request: Request):
@@ -78,24 +76,32 @@ async def return_data(
     """Route that handles zipcode or city and state to return weather data"""
     
     if zipcode is not None:
-        latitude = get_lat_zip(zipcode)
-        longitude = get_lon_zip(zipcode)
+        (latitude, longitude) = get_lat_lon_zip(zipcode)        
     else:
-        latitude = get_lat_city(city, state)
-        longitude = get_lon_city(city, state)
+        (latitude, longitude) = get_lat_lon_city(city, state)
     
     url = f"https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&appid={key_api}"
 
     response = requests.get(url)
     data = response.json()
 
-    temp_c = convert_kelvin_to_celsius(data["current"]["temp"])
+    (loc_name, loc_state) = get_location_name(latitude, longitude)
+    location_name = f"{loc_name}, {loc_state}"
 
+    humidity = data["current"]["humidity"]
+    pressure = data["current"]["pressure"]
+    weather_description = data["current"]["weather"][0]["description"]
+
+    temp_c = convert_kelvin_to_celsius(data["current"]["temp"])
     temp_f = convert_celsius_to_fahrenheight(temp_c)
+
+    icon_code = data["current"]["weather"][0]["icon"]
+
+    weather_icon = f"https://openweathermap.org/img/wn/{icon_code}@2x.png"
 
     return templates.TemplateResponse(
         "weather.html",
-        {"request": request, "temp_c": round(temp_c), "temp_f": round(temp_f)},
+        {"request": request, "location_name": location_name, "humidity": humidity, "pressure": pressure, "weather_description": weather_description, "temp_c": round(temp_c), "temp_f": round(temp_f), "weather_icon": weather_icon},
     )
 
 
