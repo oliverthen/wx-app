@@ -7,6 +7,17 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container">
+			<a class="navbar-brand" href="#">Weather App</a>
+			<div class="d-flex">
+				<button class="btn btn-primary mr-2" onclick="location.href='/login'">Login</button>
+				<button class="btn btn-success" onclick="location.href='/register'">Register</button>
+			</div>
+		</div>
+	</nav>
+
 	<div class="container mt-5">
 		<h1 class="mb-4">Enter Your ZipCode or City Name and State</h1>
 		<form id="locationForm" action="/process_zip_or_city" method="post">
