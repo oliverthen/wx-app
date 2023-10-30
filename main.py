@@ -68,6 +68,14 @@ def get_location_name(latitude, longitude):
 async def get_coordinates(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/register", response_class=HTMLResponse)
+async def get_coordinates(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+@app.get("/login", response_class=HTMLResponse)
+async def get_coordinates(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
 
 @app.post("/process_zip_or_city", response_class=HTMLResponse)
 async def return_data(
