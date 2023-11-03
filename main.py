@@ -125,13 +125,15 @@ async def return_data(
 #     session.refresh(db_user)
 #     return db_user
 
-@app.post("/register")
-def process_regsitration(first_name: str = Form(...),
+@app.post("/register", response_model=User)
+def process_regsitration(request: Request,
+    first_name: str = Form(...),
     last_name: str = Form(...),
     zipcode: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
-    session: Session = Depends(get_session)):
+    session: Session = Depends(get_session),
+    ):
 
 
     user = User(
@@ -146,4 +148,29 @@ def process_regsitration(first_name: str = Form(...),
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
-    return db_user
+
+    # Render the user information template
+    return templates.TemplateResponse("user_info.html", {"request": request, "db_user": db_user})
+
+# @app.post("/register", response_class=HTMLResponse)
+# def process_regsitration(request: Request,
+#     user_data: User = Form(...),
+#     session: Session = Depends(get_session),
+#     ):
+
+
+#     user = User(
+#         first_name=user_data.first_name,
+#         last_name=user_data.last_name,
+#         zipcode=user_data.zipcode,
+#         email=user_data.email,
+#         password=user_data.password
+#     )
+
+#     db_user = User.from_orm(user)
+#     session.add(db_user)
+#     session.commit()
+#     session.refresh(db_user)
+
+#     # Render the user information template
+#     return templates.TemplateResponse("user_info.html", {"request": request, "db_user": db_user})
