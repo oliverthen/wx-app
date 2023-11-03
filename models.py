@@ -7,9 +7,8 @@ from decouple import config
 class UserBase(SQLModel):
     first_name: str
     last_name: str
-    username: str
     email: str
-    zip_code: int
+    zipcode: str
     password: str
 
 

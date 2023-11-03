@@ -65,15 +65,15 @@ def get_location_name(latitude, longitude):
     return (response[0]["name"], response[0]["state"])
 
 @app.get("/", response_class=HTMLResponse)
-async def get_coordinates(request: Request):
+async def get_location(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/register", response_class=HTMLResponse)
-async def get_coordinates(request: Request):
+async def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
-async def get_coordinates(request: Request):
+async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -113,12 +113,35 @@ async def return_data(
     )
 
 
+# @app.post("/register")
+# def process_regsitration(*, session: Session = Depends(get_session), user: User):
+#     query = select(User).where(User.handle == user.handle)
+#     existing_user = session.exec(query).first()
+#     if existing_user is not None:
+#         raise HTTPException(status_code=400, detail="User already exists")
+#     db_user = User.from_orm(user)
+#     session.add(db_user)
+#     session.commit()
+#     session.refresh(db_user)
+#     return db_user
+
 @app.post("/register")
-def register_user(*, session: Session = Depends(get_session), user: User):
-    query = select(User).where(User.handle == user.handle)
-    existing_user = session.exec(query).first()
-    if existing_user is not None:
-        raise HTTPException(status_code=400, detail="User already exists")
+def process_regsitration(first_name: str = Form(...),
+    last_name: str = Form(...),
+    zipcode: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    session: Session = Depends(get_session)):
+
+
+    user = User(
+        first_name=first_name,
+        last_name=last_name,
+        zipcode=zipcode,
+        email=email,
+        password=password
+    )
+
     db_user = User.from_orm(user)
     session.add(db_user)
     session.commit()
