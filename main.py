@@ -2,9 +2,12 @@ from fastapi import Depends, HTTPException, FastAPI, Form, Request
 from decouple import config
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordRequestForm
+
 from sqlmodel import Session, select
 
 from models import User, get_session, create_db_and_tables
+from utils import get_hashed_password, create_access_token, create_refresh_token, verify_password
 
 import requests
 
@@ -141,7 +144,7 @@ def process_regsitration(request: Request,
         last_name=last_name,
         zipcode=zipcode,
         email=email,
-        password=password
+        password=get_hashed_password(password)
     )
 
     db_user = User.from_orm(user)
@@ -160,11 +163,11 @@ def process_login(request: Request,
     ):
 
     # Query the database to check if the email and password combination exists
-    user = session.query(User).filter_by(email=email, password=password).first()
+    user = session.query(User).filter_by(email=email).first()
 
-    if user:
+    if user and verify_password(password, user.password):
         # User is authenticated, redirect to the home page or do further actions
-        return templates.TemplateResponse("index.html", {"request": request})
+        return templates.TemplateResponse("index.html", {"request": request, "user": user})
     else:
         # User is not authenticated, return the login page or show an error message
         return templates.TemplateResponse("login.html", {"request": request, "error_message": "Invalid credentials"})
