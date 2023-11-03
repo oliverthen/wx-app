@@ -152,25 +152,19 @@ def process_regsitration(request: Request,
     # Render the user information template
     return templates.TemplateResponse("user_info.html", {"request": request, "db_user": db_user})
 
-# @app.post("/register", response_class=HTMLResponse)
-# def process_regsitration(request: Request,
-#     user_data: User = Form(...),
-#     session: Session = Depends(get_session),
-#     ):
+@app.post("/login")
+def process_login(request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    session: Session = Depends(get_session),
+    ):
 
+    # Query the database to check if the email and password combination exists
+    user = session.query(User).filter_by(email=email, password=password).first()
 
-#     user = User(
-#         first_name=user_data.first_name,
-#         last_name=user_data.last_name,
-#         zipcode=user_data.zipcode,
-#         email=user_data.email,
-#         password=user_data.password
-#     )
-
-#     db_user = User.from_orm(user)
-#     session.add(db_user)
-#     session.commit()
-#     session.refresh(db_user)
-
-#     # Render the user information template
-#     return templates.TemplateResponse("user_info.html", {"request": request, "db_user": db_user})
+    if user:
+        # User is authenticated, redirect to the home page or do further actions
+        return templates.TemplateResponse("index.html", {"request": request})
+    else:
+        # User is not authenticated, return the login page or show an error message
+        return templates.TemplateResponse("login.html", {"request": request, "error_message": "Invalid credentials"})
