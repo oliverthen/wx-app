@@ -1,8 +1,7 @@
-from fastapi import Depends, HTTPException, FastAPI, Form, Request
+from fastapi import Depends, FastAPI, Form, Request
 from decouple import config
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
 
 from sqlmodel import Session, select
 
@@ -68,7 +67,8 @@ def get_location_name(latitude, longitude):
     return (response[0]["name"], response[0]["state"])
 
 def _process_data(zipcode=None, city=None, state=None):
-    
+    """Returns tuple of variables to be displayed based on zipcode or city/state"""
+
     if zipcode is not None:
         (latitude, longitude) = get_lat_lon_zip(zipcode)        
     else:
