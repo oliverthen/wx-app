@@ -108,6 +108,10 @@ async def register_page(request: Request):
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+@app.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    return templates.TemplateResponse("logout.html", {"request": request})
+
 
 @app.post("/process_zip_or_city", response_class=HTMLResponse)
 async def return_data(
