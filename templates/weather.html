@@ -9,7 +9,13 @@
 <body>
 
 	<div class="container mt-5">
-		<h1>Weather Info</h1>
+		<h1 class="mb-4">
+			{% if user %}
+			Welcome back {{ user.first_name }}!
+			{% else %}
+			Weather Info
+			{% endif %}
+		</h1>
 		<div class="row">
 			<div class="col-md-6">
 				<div class="card">

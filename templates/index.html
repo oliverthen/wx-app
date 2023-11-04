@@ -19,17 +19,11 @@
 	</nav>
 
 	<div class="container mt-5">
-		<h1 class="mb-4">
-			{% if user %}
-			Welcome back {{ user.first_name }}!
-			{% else %}
-			Enter Your ZipCode or City Name and State
-			{% endif %}
-		</h1>
+		<h1>Weather Info</h1>
 		<form id="locationForm" action="/process_zip_or_city" method="post">
 			<div class="form-group">
 				<label for="zipcode">ZipCode:</label>
-				<input type="text" class="form-control" name="zipcode" id="zipcode" value="{{ user.zipcode if user else '' }}">
+				<input type="text" class="form-control" name="zipcode" id="zipcode">
 			</div>
 			<div class="form-group">
 				<label for="city">City Name:</label>
