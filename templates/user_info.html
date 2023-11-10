@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>User Information</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container">
+			<a class="navbar-brand" href="/">Weather App</a>
+			<div class="d-flex">
+				<button class="btn btn-primary mr-2" onclick="location.href='/login'">Login</button>
+				<button class="btn btn-success" onclick="location.href='/register'">Register</button>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col-md-6 offset-md-3">
+				<div class="card">
+					<div class="card-header">
+						User Information
+					</div>
+					<div class="card-body">
+						<h5 class="card-title">User Details</h5>
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item"><strong>First Name:</strong> {{ db_user.first_name }}</li>
+							<li class="list-group-item"><strong>Last Name:</strong> {{ db_user.last_name }}</li>
+							<li class="list-group-item"><strong>Zipcode:</strong> {{ db_user.zipcode }}</li>
+							<li class="list-group-item"><strong>Email:</strong> {{ db_user.email }}</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Include Bootstrap JS and jQuery (optional) -->
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

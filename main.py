@@ -1,10 +1,12 @@
-from fastapi import Depends, HTTPException, FastAPI, Form, Request
+from fastapi import Depends, FastAPI, Form, Request
 from decouple import config
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+
 from sqlmodel import Session, select
 
 from models import User, get_session, create_db_and_tables
+from utils import get_hashed_password, verify_password
 
 import requests
 
@@ -64,17 +66,9 @@ def get_location_name(latitude, longitude):
     
     return (response[0]["name"], response[0]["state"])
 
-@app.get("/", response_class=HTMLResponse)
-async def get_coordinates(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def _process_data(zipcode=None, city=None, state=None):
+    """Returns tuple of variables to be displayed based on zipcode or city/state"""
 
-
-@app.post("/process_zip_or_city", response_class=HTMLResponse)
-async def return_data(
-    request: Request, zipcode: str = Form(None), city: str = Form(None), state: str = Form(None)
-):
-    """Route that handles zipcode or city and state to return weather data"""
-    
     if zipcode is not None:
         (latitude, longitude) = get_lat_lon_zip(zipcode)        
     else:
@@ -99,20 +93,85 @@ async def return_data(
 
     weather_icon = f"https://openweathermap.org/img/wn/{icon_code}@2x.png"
 
+    return (location_name, humidity, pressure, weather_description, temp_c, temp_f, weather_icon)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def get_location(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    return templates.TemplateResponse("logout.html", {"request": request})
+
+
+@app.post("/process_zip_or_city", response_class=HTMLResponse)
+async def return_data(
+    request: Request, zipcode: str = Form(None), city: str = Form(None), state: str = Form(None)
+):
+    """Route that handles zipcode or city and state to return weather data"""
+    
+    #Unpack tuple returned by helper _process_data which takes in either zip code or city/state info to generate targeted values to display on the front end
+    (location_name, humidity, pressure, weather_description, temp_c, temp_f, weather_icon) = _process_data(zipcode, city, state)
+
     return templates.TemplateResponse(
         "weather.html",
         {"request": request, "location_name": location_name, "humidity": humidity, "pressure": pressure, "weather_description": weather_description, "temp_c": round(temp_c), "temp_f": round(temp_f), "weather_icon": weather_icon},
     )
 
+@app.post("/register", response_model=User)
+def process_regsitration(request: Request,
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    zipcode: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    session: Session = Depends(get_session),
+    ):
 
-@app.post("/register")
-def register_user(*, session: Session = Depends(get_session), user: User):
-    query = select(User).where(User.handle == user.handle)
-    existing_user = session.exec(query).first()
-    if existing_user is not None:
-        raise HTTPException(status_code=400, detail="User already exists")
+
+    user = User(
+        first_name=first_name,
+        last_name=last_name,
+        zipcode=zipcode,
+        email=email,
+        password=get_hashed_password(password)
+    )
+
     db_user = User.from_orm(user)
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
-    return db_user
+
+    # Render the user information template
+    return templates.TemplateResponse("user_info.html", {"request": request, "db_user": db_user})
+
+@app.post("/login")
+def process_login(request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    session: Session = Depends(get_session),
+    ):
+
+    # Query the database to check if the email and password combination exists
+    user = session.query(User).filter_by(email=email).first()
+
+    if user and verify_password(password, user.password):
+        # User is authenticated, redirect to the weather info for that user based on their zip code
+        (location_name, humidity, pressure, weather_description, temp_c, temp_f, weather_icon) = _process_data(user.zipcode)
+
+        return templates.TemplateResponse(
+            "weather.html",
+            {"request": request, "user": user, "location_name": location_name, "humidity": humidity, "pressure": pressure, "weather_description": weather_description, "temp_c": round(temp_c), "temp_f": round(temp_f), "weather_icon": weather_icon},
+        )
+    else:
+        # User is not authenticated, return the login page
+        return templates.TemplateResponse("login.html", {"request": request, "error_message": "Invalid credentials"})

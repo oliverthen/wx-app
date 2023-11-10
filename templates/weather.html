@@ -7,8 +7,32 @@
 </head>
 
 <body>
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container">
+			<a class="navbar-brand" href="/">Weather App</a>
+			<div class="d-flex">
+				{% if user %}
+					<button class="btn btn-primary mr-2" onclick="location.href='/logout'">Logout</button>
+				{% else %}
+					<!-- User is not logged in, so display a login button -->
+					<button class="btn btn-primary mr-2" onclick="location.href='/login'">Login</button>
+				{% endif %}				
+
+				<button class="btn btn-success" onclick="location.href='/register'">Register</button>
+			</div>
+		</div>
+	</nav>
+
+
 	<div class="container mt-5">
-		<h1>Weather Info</h1>
+		<h1 class="mb-4">
+			{% if user %}
+			Welcome back {{ user.first_name }}!
+			{% else %}
+			Weather Info
+			{% endif %}
+		</h1>
 		<div class="row">
 			<div class="col-md-6">
 				<div class="card">
